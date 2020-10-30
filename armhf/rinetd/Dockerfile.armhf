@@ -1,0 +1,25 @@
+FROM alpine:latest@sha256:c929c5ca1d3f793bfdd2c6d6d9210e2530f1184c0f488f514f1bb8080bb1e82b AS builder
+
+# RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
+
+RUN set -ex \
+    && apk add --no-cache \
+        build-base \
+        git \
+        autoconf \
+        automake \
+    && cd /tmp \
+    && git clone "https://github.com/samhocevar/rinetd" \
+    && cd rinetd \
+    && ./bootstrap \
+    && ./configure --prefix=/usr \
+    && make -j $(nproc)
+
+FROM alpine:latest
+
+COPY --from=builder /tmp/rinetd/rinetd /usr/sbin/rinetd
+COPY entrypoint.sh /entrypoint.sh
+
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT /entrypoint.sh
