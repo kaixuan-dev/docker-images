@@ -1,0 +1,16 @@
+FROM alpine:latest@sha256:c929c5ca1d3f793bfdd2c6d6d9210e2530f1184c0f488f514f1bb8080bb1e82b
+
+ENV FRP_VERSION 0.34.1
+
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
+
+RUN cd /root \
+    &&  wget --no-check-certificate -c https://github.com/fatedier/frp/releases/download/v${FRP_VERSION}/frp_${FRP_VERSION}_linux_arm.tar.gz \
+    &&  tar zxvf frp_${FRP_VERSION}_linux_arm.tar.gz  \
+    &&  cd frp_${FRP_VERSION}_linux_arm/ \
+    &&  cp frpc /usr/bin/ \
+    &&  mkdir -p /etc/frp \
+    &&  cp frpc.ini /etc/frp \
+    &&  rm /root/* 
+
+ENTRYPOINT /usr/bin/frpc -c /etc/frp/frpc.ini
