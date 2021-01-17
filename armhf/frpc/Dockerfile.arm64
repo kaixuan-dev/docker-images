@@ -1,0 +1,18 @@
+FROM arm64v8/alpine
+
+ENV FRP_VERSION 0.34.3
+
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
+
+COPY frp_0.34.3_linux_arm64.tar.gz /root/
+
+RUN cd /root \
+    &&  wget --no-check-certificate -c https://github.com/fatedier/frp/releases/download/v${FRP_VERSION}/frp_${FRP_VERSION}_linux_arm.tar.gz \
+    &&  tar zxvf frp_${FRP_VERSION}_linux_arm64.tar.gz  \
+    &&  cd frp_${FRP_VERSION}_linux_arm64/ \
+    &&  cp frpc /usr/bin/ \
+    &&  mkdir -p /etc/frp \
+    &&  cp frpc.ini /etc/frp \
+    &&  rm -rf /root/*
+
+ENTRYPOINT /usr/bin/frpc -c /etc/frp/frpc.ini
